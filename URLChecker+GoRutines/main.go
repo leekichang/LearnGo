@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 )
 
-type result struct {
+type requestResult struct {
 	url    string
 	status string
 }
@@ -16,7 +15,7 @@ var errRequestFailed = errors.New("Request failed")
 
 func main() {
 	results := make(map[string]string) // var results = make(map[string]string) 랑 같음.
-	c := make(chan result)
+	c := make(chan requestResult)
 	urls := []string{
 		"https://www.airbnb.com/",
 		"https://www.google.com/",
@@ -32,15 +31,21 @@ func main() {
 	for _, url := range urls {
 		go hitURL(url, c)
 	}
-	time.Sleep(time.Second)
+	for i := 0; i < len(urls); i++ { //FUCKING FAST! AWESOME 한 부분이다....
+		result := <-c
+		results[result.url] = result.status
+	}
+	for url, status := range results {
+		fmt.Println(url, status)
+	}
 }
 
-func hitURL(url string, c chan<- result) { //chan<- 하면 send only
+func hitURL(url string, c chan<- requestResult) { //chan<- 하면 send only
 	fmt.Println("Checking:", url)
 	resp, err := http.Get(url)
 	status := "OK"
 	if err != nil || resp.StatusCode >= 400 {
 		status = "FAILED"
 	}
-	c <- result{url: url, status: status}
+	c <- requestResult{url: url, status: status}
 }
