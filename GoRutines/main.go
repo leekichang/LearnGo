@@ -8,7 +8,7 @@ import (
 func main() {
 	go sexyCount("nico")
 	go sexyCount("FLYN")
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 5) //go rutine은 main func이 살아있는 동안만 인정됨.
 }
 
 func sexyCount(person string) {
